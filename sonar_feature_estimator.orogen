@@ -1,0 +1,27 @@
+name "sonar_feature_estimator"
+# version "0.1"
+
+import_types_from "base"
+using_library "sonar_detectors"
+
+task_context "Task" do
+
+   property "config_value", "/std/string"
+
+   input_port("sonar_input", '/base/samples/SonarBeam').
+    	needs_reliable_connection
+   input_port ("orientation_sample", '/base/samples/RigidBodyState')
+
+   output_port('features', '/base/samples/Pointcloud').
+        doc("")
+
+   port_driven "sonar_input"
+end
+
+
+# Declares a deployment, i.e. an actual executable that contains various tasks.
+deployment "sonar_feature_estimator" do
+    do_not_install
+    task("sonar_feature_estimator", "Task")
+end
+

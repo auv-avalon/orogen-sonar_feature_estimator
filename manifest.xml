@@ -1,0 +1,13 @@
+<package>
+  <description brief="The sonar feature estimator tries to identify features in the sonar beams.">
+  
+  </description>
+  <author>Sascha Arnold/sirius@tzi.de</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+
+  <depend package="base/orogen/types" />
+  <depend package="avalon/sonar_detectors" />
+
+</package>
