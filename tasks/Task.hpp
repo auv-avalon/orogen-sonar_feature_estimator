@@ -4,6 +4,9 @@
 #define SONAR_FEATURE_ESTIMATOR_TASK_TASK_HPP
 
 #include "sonar_feature_estimator/TaskBase.hpp"
+#include <sonar_detectors/FeatureExtraction.hpp>
+#include <sonar_detectors/SonarMap.hpp>
+#include <sonar_detectors/SonarDetectorTypes.hpp>
 
 namespace sonar_feature_estimator {
     class Task : public TaskBase
@@ -11,7 +14,9 @@ namespace sonar_feature_estimator {
 	friend class TaskBase;
     protected:
         base::samples::RigidBodyState current_orientation;
-        
+        sonar_detectors::FeatureExtraction featureExtraction;
+        avalon::SonarMap<avalon::obstaclePoint> featureMap;
+        std::list<avalon::obstaclePoint>* featureList;
 
     public:
         Task(std::string const& name = "sonar_feature_estimator::Task", TaskCore::TaskState initial_state = Stopped);

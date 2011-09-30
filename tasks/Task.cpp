@@ -1,6 +1,8 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
 
 #include "Task.hpp"
+#include <sonar_detectors/SonarBeamProcessing.hpp>
+#include <base/samples/pointcloud.h>
 
 using namespace sonar_feature_estimator;
 
@@ -43,12 +45,10 @@ bool Task::startHook()
                     << "Input port 'sonar_input' is not connected." << std::endl;
         return false;
     }
-    if (!_orientation_sample.connected())
-    {
-        std::cerr << TaskContext::getName() << ": "
-                    << "Input port 'orientation_sample' is not connected." << std::endl;
-        return false;
-    }
+    
+    featureList = featureMap.getFeatureListPtr();
+    featureMap.setFeatureTimeout(15000);
+    current_orientation.invalidate();
     
     return true;
 }
@@ -61,11 +61,23 @@ void Task::updateHook()
     base::samples::SonarBeam sonarBeam;
     while (_sonar_input.read(sonarBeam) == RTT::NewData) 
     {
-        
+        featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
+        int index = featureExtraction.getFeatureMaximalLevelDifference(sonarBeam.beam);
+        if (index >= 0)
+        {
+            avalon::obstaclePoint feature = avalon::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
+            _new_feature.write(feature.position);
+            featureMap.addFeature(feature, feature.angle, feature.time);
+        }
     }
     
-    
-    
+    base::samples::Pointcloud pointCloud;
+    pointCloud.time = base::Time::now();
+    for(std::list<avalon::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
+    {
+        pointCloud.points.push_back(it->position);
+    }
+    _features.write(pointCloud);
 }
 
 // void Task::errorHook()

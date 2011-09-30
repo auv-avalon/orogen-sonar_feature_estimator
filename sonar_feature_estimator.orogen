@@ -13,7 +13,11 @@ task_context "Task" do
    input_port ("orientation_sample", '/base/samples/RigidBodyState')
 
    output_port('features', '/base/samples/Pointcloud').
-        doc("")
+        doc("whole pointcloud of sonar features")
+
+   output_port('new_feature', '/base/Vector3d').
+        doc("newest sonar feature")
+
 
    port_driven "sonar_input"
 end
@@ -21,7 +25,6 @@ end
 
 # Declares a deployment, i.e. an actual executable that contains various tasks.
 deployment "sonar_feature_estimator" do
-    do_not_install
     task("sonar_feature_estimator", "Task")
 end
 
