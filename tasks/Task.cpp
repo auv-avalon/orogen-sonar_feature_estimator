@@ -62,7 +62,11 @@ void Task::updateHook()
     while (_sonar_input.read(sonarBeam) == RTT::NewData) 
     {
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
-        int index = featureExtraction.getFeatureMaximalLevelDifference(sonarBeam.beam);
+        
+        std::vector<float> beam = featureExtraction.balancePointFilter(sonarBeam.beam);
+        featureExtraction.removeInfluence(beam);
+        int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
+        
         if (index >= 0)
         {
             avalon::obstaclePoint feature = avalon::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
