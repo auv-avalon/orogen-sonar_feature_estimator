@@ -15,8 +15,8 @@ namespace sonar_feature_estimator {
     protected:
         base::samples::RigidBodyState current_orientation;
         sonar_detectors::FeatureExtraction featureExtraction;
-        avalon::SonarMap<avalon::obstaclePoint> featureMap;
-        std::list<avalon::obstaclePoint>* featureList;
+        sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> featureMap;
+        std::list<sonar_detectors::obstaclePoint>* featureList;
 
     public:
         Task(std::string const& name = "sonar_feature_estimator::Task", TaskCore::TaskState initial_state = Stopped);

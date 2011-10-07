@@ -69,7 +69,7 @@ void Task::updateHook()
         
         if (index >= 0)
         {
-            avalon::obstaclePoint feature = avalon::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
+            sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
             _new_feature.write(feature.position);
             featureMap.addFeature(feature, feature.angle, feature.time);
         }
@@ -77,7 +77,7 @@ void Task::updateHook()
     
     base::samples::Pointcloud pointCloud;
     pointCloud.time = base::Time::now();
-    for(std::list<avalon::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
+    for(std::list<sonar_detectors::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
     {
         pointCloud.points.push_back(it->position);
     }
