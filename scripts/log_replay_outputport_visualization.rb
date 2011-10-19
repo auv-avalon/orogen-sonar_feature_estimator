@@ -17,7 +17,7 @@ Orocos.run 'sonar_feature_estimator' do
     log.sonar.BaseScan.connect_to feature_estimator.sonar_input
     log.orientation_estimator.orientation_samples.connect_to feature_estimator.orientation_sample
 
-    view3d = Vizkit.default_loader.create_widget('vizkit::Vizkit3DWidget')
+    view3d = Vizkit.default_loader.create_widget('vizkit::QVizkitMainWindow')
     view3d.show()
     sonarfeatureviz = view3d.createPlugin('sonarfeature', 'SonarFeatureVisualization')
     auv_avalon = view3d.createPlugin('auv_avalon', 'AUVAvalonVisualization')
