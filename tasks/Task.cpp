@@ -3,6 +3,7 @@
 #include "Task.hpp"
 #include <sonar_detectors/SonarBeamProcessing.hpp>
 #include <base/samples/pointcloud.h>
+#include <dsp_acoustics/FIRFilter.h>
 
 using namespace sonar_feature_estimator;
 
@@ -63,8 +64,7 @@ void Task::updateHook()
     {
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
-        std::vector<float> beam = featureExtraction.balancePointFilter(sonarBeam.beam);
-        featureExtraction.removeInfluence(beam);
+        dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
         int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
         
         if (index >= 0)

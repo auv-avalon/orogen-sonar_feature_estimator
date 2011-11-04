@@ -3,6 +3,7 @@ name "sonar_feature_estimator"
 
 import_types_from "base"
 using_library "sonar_detectors"
+using_library "dsp_acoustics"
 
 task_context "Task" do
 
