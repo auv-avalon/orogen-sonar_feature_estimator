@@ -64,6 +64,7 @@ void Task::updateHook()
     {
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
+        std::vector<float> beam(sonarBeam.beam.size());
         dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
         int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
         
@@ -71,7 +72,7 @@ void Task::updateHook()
         {
             sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
             _new_feature.write(feature.position);
-            featureMap.addFeature(feature, feature.angle, feature.time);
+            featureMap.addFeature(feature, feature.angle.rad, feature.time);
         }
     }
     
