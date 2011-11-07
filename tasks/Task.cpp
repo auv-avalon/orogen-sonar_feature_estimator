@@ -2,8 +2,10 @@
 
 #include "Task.hpp"
 #include <sonar_detectors/SonarBeamProcessing.hpp>
+#include <machine_learning/DBScan.hpp>
 #include <base/samples/pointcloud.h>
 #include <dsp_acoustics/FIRFilter.h>
+#include <map>
 
 using namespace sonar_feature_estimator;
 
@@ -82,7 +84,18 @@ void Task::updateHook()
     {
         pointCloud.points.push_back(it->position);
     }
+    
     _features.write(pointCloud);
+    
+    // ------ Clustering Approach
+    machine_learning::DBScan dbscan(featureList,3,2.0);
+    std::map<sonar_detectors::obstaclePoint*, int> clustering = dbscan.scan();
+    
+    // Debug Printout
+    std::cout << "Clustering:" << std::endl;
+    for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
+        std::cout << machine_learning::pointToString(it->first) << " clustered as " << it->second << std::endl;
+    }
 }
 
 // void Task::errorHook()
