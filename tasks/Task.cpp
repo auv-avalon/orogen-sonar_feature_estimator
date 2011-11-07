@@ -94,7 +94,7 @@ void Task::updateHook()
     // Debug Printout
     std::cout << "Clustering:" << std::endl;
     for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
-        std::cout << machine_learning::pointToString(it->first) << " clustered as " << it->second << std::endl;
+        std::cout << machine_learning::pointToString(*(it->first)) << " clustered as " << it->second << std::endl;
     }
 }
 
