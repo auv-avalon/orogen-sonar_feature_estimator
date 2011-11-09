@@ -11,7 +11,7 @@ task_context "Task" do
 
    input_port("sonar_input", '/base/samples/SonarBeam').
     	needs_reliable_connection
-   input_port ("orientation_sample", '/base/samples/RigidBodyState')
+   input_port("orientation_sample", '/base/samples/RigidBodyState')
 
    output_port('features', '/base/samples/Pointcloud').
         doc("whole pointcloud of sonar features")
