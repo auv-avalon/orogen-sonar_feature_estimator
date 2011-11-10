@@ -18,6 +18,12 @@ namespace sonar_feature_estimator {
         sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> featureMap;
         std::list<sonar_detectors::obstaclePoint>* featureList;
 
+        // Clustering
+        std::vector<base::Vector3d> colors;
+        base::Vector3d getDistinctColor(int idx);
+
+
+
     public:
         Task(std::string const& name = "sonar_feature_estimator::Task", TaskCore::TaskState initial_state = Stopped);
         Task(std::string const& name, RTT::ExecutionEngine* engine, TaskCore::TaskState initial_state = Stopped);
