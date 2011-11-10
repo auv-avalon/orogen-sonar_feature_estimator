@@ -13,6 +13,8 @@ log = Orocos::Log::Replay.open(ARGV)
 Orocos.run 'sonar_feature_estimator' do
 
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
+    feature_estimator.DBScan_min_pts = 3
+    feature_estimator.DBScan_epsilon = 2.0
 
     log.sonar.BaseScan.connect_to feature_estimator.sonar_input
     log.orientation_estimator.orientation_samples.connect_to feature_estimator.orientation_sample
@@ -27,12 +29,17 @@ Orocos.run 'sonar_feature_estimator' do
     con = Vizkit.connect_port_to 'sonar_feature_estimator', 'features', :type => :buffer, :size => 100, :auto_reconnect => true, :pull => false, :update_frequency => 33 do |sample, name|
         sonarfeatureviz.updatePointCloud(sample)
         sample
-    end 
+    end
+    # Connect cluster information debug port to vizkit plugin
+    Vizkit.connect_port_to 'sonar_feature_estimator', 'point_colors', :type => :buffer, :size => 100, :auto_reconnect => true, :pull => false, :update_frequency => 33 do |sample, name|
+        sonarfeatureviz.updateChannelData(sample)
+        sample
+    end
 
     log.orientation_estimator.orientation_samples :type => :buffer, :size => 100  do |sample|
         auv_avalon.updateRigidBodyState(sample)
         sample
-    end 
+    end
 
     feature_estimator.start
 
