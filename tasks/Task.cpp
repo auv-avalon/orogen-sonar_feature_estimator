@@ -77,7 +77,15 @@ void Task::updateHook()
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
         std::vector<float> beam(sonarBeam.beam.size());
-        dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
+        try 
+        {
+            dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
+        } 
+        catch (std::runtime_error e)
+        {
+            RTT::log(RTT::Warning) << "Error while filtering the sonarbeam: " << e.what() << RTT::endlog();
+            return;
+        }
         int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
         
         if (index >= 0)
