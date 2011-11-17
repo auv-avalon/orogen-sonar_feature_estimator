@@ -18,10 +18,13 @@ Task::Task(std::string const& name, TaskCore::TaskState initial_state)
     colors.push_back(base::Vector3d(0,255,0)); // green
     colors.push_back(base::Vector3d(255,255,0)); // yellow
     colors.push_back(base::Vector3d(255,0,255)); // magenta
-    colors.push_back(base::Vector3d(255,128,128)); // pink
-    colors.push_back(base::Vector3d(128,128,128)); // gray
+    //colors.push_back(base::Vector3d(255,128,128)); // pink
+    //colors.push_back(base::Vector3d(128,128,128)); // gray
     colors.push_back(base::Vector3d(128,0,0)); // brown
     colors.push_back(base::Vector3d(255,128,0)); // orange
+    
+    colors.push_back(base::Vector3d(147,170,0)); // vivid yellowish green
+    colors.push_back(base::Vector3d(0,125,53)); // vivid green
 }
 
 Task::Task(std::string const& name, RTT::ExecutionEngine* engine, TaskCore::TaskState initial_state)
@@ -111,6 +114,7 @@ void Task::updateHook()
     
 
     std::cout << "Cluster count in this point cloud: " << dbscan.getClusterCount() << std::endl;
+    std::cout << "NOISE count in this point cloud: " << dbscan.getNoiseCount() << std::endl;
 
     // Generating color information
     std::vector<base::Vector3d> point_colors;
@@ -119,9 +123,9 @@ void Task::updateHook()
         std::list<sonar_detectors::obstaclePoint>::iterator flit = featureList->begin();
         for(int i = 0; i < featureList->size(); i++, flit++) {
             // Get color for cluster id at this index
-            std::cout << "clustering[" << machine_learning::pointToString(*flit) << "]: " << clustering[&(*flit)];
+//            std::cout << "clustering[" << machine_learning::pointToString(*flit) << "]: " << clustering[&(*flit)];
             base::Vector3d distinct_color = getDistinctColor(clustering[&(*flit)]);
-            std::cout << " with color " << distinct_color[0] << "," << distinct_color[1] << "," << distinct_color[2] << std::endl;
+//            std::cout << " with color " << distinct_color[0] << "," << distinct_color[1] << "," << distinct_color[2] << std::endl;
             point_colors.push_back(distinct_color);
         }
         _point_colors.write(point_colors);
@@ -152,7 +156,7 @@ base::Vector3d Task::getDistinctColor(int cluster_id)
     if(cluster_id == machine_learning::DBScan::NOISE) {
         return base::Vector3d(255,255,255); // white
     } else {
-        assert(cluster_id >= 0 && cluster_id < 9); // 9 = amount of available colors
+        assert(cluster_id >= 0 && cluster_id < colors.size());
         return colors[cluster_id];
     }
 }
