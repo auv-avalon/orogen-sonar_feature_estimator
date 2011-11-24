@@ -19,6 +19,8 @@ task_context "Task" do
    output_port('new_feature', '/base/Vector3d').
         doc("newest sonar feature")
 
+    output_port('new_feature_as_laserscan', '/base/samples/LaserScan').
+        doc("newest sonar feature as LaserScan without heading correction")
 
    port_driven "sonar_input"
 end

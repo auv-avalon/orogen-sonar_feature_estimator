@@ -3,6 +3,7 @@
 #include "Task.hpp"
 #include <sonar_detectors/SonarBeamProcessing.hpp>
 #include <base/samples/pointcloud.h>
+#include <base/samples/laser_scan.h>
 #include <dsp_acoustics/FIRFilter.h>
 
 using namespace sonar_feature_estimator;
@@ -76,6 +77,10 @@ void Task::updateHook()
         }
         int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
         
+        // write newest feature as laser scan without heading correction
+        _new_feature_as_laserscan.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(index, sonarBeam));
+        
+        // save feature as obstaclePoint if it has found one
         if (index >= 0)
         {
             sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
