@@ -7,6 +7,8 @@
 #include <dsp_acoustics/FIRFilter.h>
 #include <map>
 #include <cassert>
+#include <stdio.h>
+#include <boost/foreach.hpp>
 
 using namespace sonar_feature_estimator;
 
@@ -108,10 +110,23 @@ void Task::updateHook()
     
     _features.write(pointCloud);
     
+    std::list<base::Vector3d*> cl_featureList;
+    for(std::list<sonar_detectors::obstaclePoint>::iterator it = featureList->begin(); it != featureList->end(); it++) {
+        cl_featureList.push_back(&(*it).position);
+        printf("pushed back address %p\n",&(*it).position);
+    }
+/*
+    BOOST_FOREACH(sonar_detectors::obstaclePoint op, *featureList) {
+        cl_featureList.push_back(&(op.position));
+        printf("pushed back address %p\n",&(op.position));
+    }
+*/
+    std::cout << "cl_featureList.size(): " << cl_featureList.size() << std::endl;
+
     // ------ Clustering Approach
-    machine_learning::DBScan dbscan(featureList,_DBScan_min_pts.get(), _DBScan_epsilon.get());
-    std::map<sonar_detectors::obstaclePoint*, int> clustering = dbscan.scan();
-    
+    machine_learning::DBScan dbscan(&cl_featureList,_DBScan_min_pts.get(), _DBScan_epsilon.get());
+    std::map<base::Vector3d*, int> clustering = dbscan.scan();
+
 
     std::cout << "Cluster count in this point cloud: " << dbscan.getClusterCount() << std::endl;
     std::cout << "NOISE count in this point cloud: " << dbscan.getNoiseCount() << std::endl;
@@ -119,6 +134,15 @@ void Task::updateHook()
     // Generating color information
     std::vector<base::Vector3d> point_colors;
 
+    if(!cl_featureList.empty()) {
+        BOOST_FOREACH(base::Vector3d* p, cl_featureList) {
+            base::Vector3d distinct_color = getDistinctColor(clustering[p]);
+            point_colors.push_back(distinct_color);
+        }
+        _point_colors.write(point_colors);
+    }
+
+/*
     if(!featureList->empty()) {
         std::list<sonar_detectors::obstaclePoint>::iterator flit = featureList->begin();
         for(int i = 0; i < featureList->size(); i++, flit++) {
@@ -130,7 +154,7 @@ void Task::updateHook()
         }
         _point_colors.write(point_colors);
     }
-
+*/
 
     //std::cout << "Clustering:" << std::endl;
     //for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
