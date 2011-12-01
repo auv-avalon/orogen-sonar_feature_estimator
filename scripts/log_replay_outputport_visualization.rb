@@ -14,7 +14,7 @@ Orocos.run 'sonar_feature_estimator' do
 
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
     feature_estimator.DBScan_min_pts = 3
-    feature_estimator.DBScan_epsilon = 2.0
+    feature_estimator.DBScan_epsilon = 3.0
 
     log.sonar.BaseScan.connect_to feature_estimator.sonar_input
     log.orientation_estimator.orientation_samples.connect_to feature_estimator.orientation_sample
