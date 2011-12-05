@@ -22,9 +22,12 @@ Task::Task(std::string const& name, TaskCore::TaskState initial_state)
     colors.push_back(base::Vector3d(255,0,255)); // magenta
     //colors.push_back(base::Vector3d(255,128,128)); // pink
     //colors.push_back(base::Vector3d(128,128,128)); // gray
-    colors.push_back(base::Vector3d(128,0,0)); // brown
-    colors.push_back(base::Vector3d(255,128,0)); // orange
-    
+    //colors.push_back(base::Vector3d(128,0,0)); // brown
+    //colors.push_back(base::Vector3d(255,128,0)); // orange
+    colors.push_back(base::Vector3d(0,255,255)); // cyan
+    colors.push_back(base::Vector3d(128,128,128)); // grey
+    colors.push_back(base::Vector3d(0,0,0)); // black
+
     colors.push_back(base::Vector3d(147,170,0)); // vivid yellowish green
     colors.push_back(base::Vector3d(0,125,53)); // vivid green
 }
