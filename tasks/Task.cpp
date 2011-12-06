@@ -2,6 +2,7 @@
 
 #include "Task.hpp"
 #include <sonar_detectors/SonarBeamProcessing.hpp>
+#include <sonar_detectors/PointClustering.hpp>
 #include <machine_learning/DBScan.hpp>
 #include <base/samples/pointcloud.h>
 #include <dsp_acoustics/FIRFilter.h>
@@ -9,6 +10,8 @@
 #include <cassert>
 #include <stdio.h>
 #include <boost/foreach.hpp>
+#include <vector>
+#include <set>
 
 using namespace sonar_feature_estimator;
 
@@ -25,11 +28,7 @@ Task::Task(std::string const& name, TaskCore::TaskState initial_state)
     //colors.push_back(base::Vector3d(128,0,0)); // brown
     //colors.push_back(base::Vector3d(255,128,0)); // orange
     colors.push_back(base::Vector3d(0,255,255)); // cyan
-    colors.push_back(base::Vector3d(128,128,128)); // grey
     colors.push_back(base::Vector3d(0,0,0)); // black
-
-    colors.push_back(base::Vector3d(147,170,0)); // vivid yellowish green
-    colors.push_back(base::Vector3d(0,125,53)); // vivid green
 }
 
 Task::Task(std::string const& name, RTT::ExecutionEngine* engine, TaskCore::TaskState initial_state)
@@ -104,65 +103,70 @@ void Task::updateHook()
         }
     }
     
-    base::samples::Pointcloud pointCloud;
-    pointCloud.time = base::Time::now();
-    for(std::list<sonar_detectors::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
-    {
-        pointCloud.points.push_back(it->position);
-    }
+
     
-    _features.write(pointCloud);
+    sonar_detectors::PointClustering pc;
     
     std::list<base::Vector3d*> cl_featureList;
     for(std::list<sonar_detectors::obstaclePoint>::iterator it = featureList->begin(); it != featureList->end(); it++) {
         cl_featureList.push_back(&(*it).position);
-        printf("pushed back address %p\n",&(*it).position);
+        // printf("pushed back address %p\n",&(*it).position);
     }
-/*
-    BOOST_FOREACH(sonar_detectors::obstaclePoint op, *featureList) {
-        cl_featureList.push_back(&(op.position));
-        printf("pushed back address %p\n",&(op.position));
-    }
-*/
+
     std::cout << "cl_featureList.size(): " << cl_featureList.size() << std::endl;
+    
+    std::vector< std::set<base::Vector3d*> > clusterVec = pc.clusterPointCloud(&cl_featureList,_DBScan_min_pts.get(), _DBScan_epsilon.get());
+    
+    std::cout << "clusterVec.size(): " << clusterVec.size() << std::endl;
+    
+    //std::cout << "set sizes in task" << std::endl;
+    BOOST_FOREACH(std::set<base::Vector3d*> set, clusterVec) {
+        std::cout << set.size() << std::endl;
+    }
 
-    // ------ Clustering Approach
-    machine_learning::DBScan dbscan(&cl_featureList,_DBScan_min_pts.get(), _DBScan_epsilon.get());
-    std::map<base::Vector3d*, int> clustering = dbscan.scan();
+    // machine_learning::DBScan dbscan(&cl_featureList,_DBScan_min_pts.get(), _DBScan_epsilon.get());
+    // std::map<base::Vector3d*, int> clustering = dbscan.scan();
 
-
-    std::cout << "Cluster count in this point cloud: " << dbscan.getClusterCount() << std::endl;
-    std::cout << "NOISE count in this point cloud: " << dbscan.getNoiseCount() << std::endl;
+    //std::cout << "Cluster count in this point cloud: " << dbscan.getClusterCount() << std::endl;
+    //std::cout << "NOISE count in this point cloud: " << dbscan.getNoiseCount() << std::endl;
 
     // Generating color information
     std::vector<base::Vector3d> point_colors;
 
+    base::samples::Pointcloud pointCloud;
+    pointCloud.time = base::Time::now();
+
+
     if(!cl_featureList.empty()) {
-        BOOST_FOREACH(base::Vector3d* p, cl_featureList) {
-            base::Vector3d distinct_color = getDistinctColor(clustering[p]);
-            point_colors.push_back(distinct_color);
+        int cl_id = 0;
+        BOOST_FOREACH(std::set<base::Vector3d*> set, clusterVec) {
+            BOOST_FOREACH(base::Vector3d* point, set) {
+                base::Vector3d distinct_color = getDistinctColor(cl_id);
+                point_colors.push_back(distinct_color);
+                pointCloud.points.push_back(*point);
+            }
+            cl_id++;
         }
-        _point_colors.write(point_colors);
-    }
-
-/*
-    if(!featureList->empty()) {
-        std::list<sonar_detectors::obstaclePoint>::iterator flit = featureList->begin();
-        for(int i = 0; i < featureList->size(); i++, flit++) {
-            // Get color for cluster id at this index
-//            std::cout << "clustering[" << machine_learning::pointToString(*flit) << "]: " << clustering[&(*flit)];
-            base::Vector3d distinct_color = getDistinctColor(clustering[&(*flit)]);
-//            std::cout << " with color " << distinct_color[0] << "," << distinct_color[1] << "," << distinct_color[2] << std::endl;
-            point_colors.push_back(distinct_color);
+        //std::cout << "colors being written out" << std::endl;
+        BOOST_FOREACH(base::Vector3d color, point_colors) {
+            std::cout << machine_learning::pointToString(color);
         }
+        std::cout << endl;
+        
+        //std::cout << "cl_featureList.size() = " << cl_featureList.size() << ", point color count: " << point_colors.size() << std::endl;
+        
+        _features.write(pointCloud);
         _point_colors.write(point_colors);
+        
     }
-*/
-
-    //std::cout << "Clustering:" << std::endl;
-    //for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
-    //    std::cout << machine_learning::pointToString(*(it->first)) << " clustered as " << it->second << std::endl;
+    //if(!cl_featureList.empty()) {
+    //    BOOST_FOREACH(base::Vector3d* p, cl_featureList) {
+    //        base::Vector3d distinct_color = getDistinctColor(clustering[p]);
+    //       point_colors.push_back(distinct_color);
+    //    }
+    //   _point_colors.write(point_colors);
     //}
+
 }
 
 // void Task::errorHook()
@@ -180,10 +184,13 @@ void Task::updateHook()
 
 base::Vector3d Task::getDistinctColor(int cluster_id)
 {
+    //std::cout << "getDistinctColor(): cluster_id = " << cluster_id;
     if(cluster_id == machine_learning::DBScan::NOISE) {
+        //std::cout << " with color white" << std::endl;
         return base::Vector3d(255,255,255); // white
     } else {
         assert(cluster_id >= 0 && cluster_id < colors.size());
+        //std::cout << " with color " << machine_learning::pointToString(colors[cluster_id]) << std::endl;
         return colors[cluster_id];
     }
 }
