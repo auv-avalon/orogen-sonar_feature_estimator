@@ -63,12 +63,20 @@ void Task::updateHook()
     base::samples::SonarBeam sonarBeam;
     while (_sonar_input.read(sonarBeam) == RTT::NewData) 
     {
+        // update sonar environment model
+        model.updateSonarBeamProperties(sonarBeam.sampling_interval);
+        model.updateAUVOrientation(current_orientation.orientation);
+        model.updateDistanceToSurface(current_orientation.position.z() * -1);
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
         std::vector<float> beam(sonarBeam.beam.size());
         try 
         {
             dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
+            
+            // subtract noise distributions
+            model.updateNoiseDistributionValues(sonarBeam.bearing.rad, beam);
+            dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(beam.begin(), beam.end(), beam.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
         } 
         catch (std::runtime_error e)
         {

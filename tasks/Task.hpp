@@ -7,6 +7,7 @@
 #include <sonar_detectors/FeatureExtraction.hpp>
 #include <sonar_detectors/SonarMap.hpp>
 #include <sonar_detectors/SonarDetectorTypes.hpp>
+#include <sonar_detectors/SonarEnvironmentModel.hpp>
 
 namespace sonar_feature_estimator {
     class Task : public TaskBase
@@ -15,6 +16,7 @@ namespace sonar_feature_estimator {
     protected:
         base::samples::RigidBodyState current_orientation;
         sonar_detectors::FeatureExtraction featureExtraction;
+        sonar_detectors::SonarEnvironmentModel model;
         sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> featureMap;
         std::list<sonar_detectors::obstaclePoint>* featureList;
 
