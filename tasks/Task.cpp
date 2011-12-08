@@ -4,6 +4,7 @@
 #include <sonar_detectors/SonarBeamProcessing.hpp>
 #include <sonar_detectors/PointClustering.hpp>
 #include <machine_learning/DBScan.hpp>
+#include <machine_learning/ClusteringUtils.hpp>
 #include <base/samples/pointcloud.h>
 #include <dsp_acoustics/FIRFilter.h>
 #include <map>
