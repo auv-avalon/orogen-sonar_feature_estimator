@@ -74,29 +74,49 @@ void Task::updateHook()
         model.updateDistanceToSurface(current_orientation.position.z() * -1);
         featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
-        std::vector<float> beam(sonarBeam.beam.size());
+        std::vector<float> filtered_beam(sonarBeam.beam.size());
+        int feature_index = -1;
         try 
         {
-            dsp::movingAverageFilterSymD<std::vector<uint8_t>::const_iterator,std::vector<float>::iterator>(sonarBeam.beam.begin(), sonarBeam.beam.end(), beam.begin(), sonarBeam.beam.size() / 30);
+            // threshold filter
+            float average_value = 0.0f;
+            std::vector<float> temp_beam(sonarBeam.beam.size());
+            dsp::proportionallyThresholdFilter<std::vector<uint8_t>::const_iterator, std::vector<float>::iterator, float>(sonarBeam.beam.begin(), sonarBeam.beam.end(), temp_beam.begin(), average_value, 0.5, true);
             
-            // subtract noise distributions
-            model.updateNoiseDistributionValues(sonarBeam.bearing.rad, beam);
-            dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(beam.begin(), beam.end(), beam.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
+            if(average_value < 1.0)
+            {
+                std::cerr << "sonar beam is allmost empty." << std::endl;
+            }
+            else
+            {
+                // filter beam
+                dsp::movingAverageFilterSymD<std::vector<float>::const_iterator,std::vector<float>::iterator>(temp_beam.begin(), temp_beam.end(), filtered_beam.begin(), temp_beam.size() / 30);
+
+                // subtract noise distributions
+                model.updateNoiseDistributionValues(sonarBeam.bearing.rad, filtered_beam);
+                dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(filtered_beam.begin(), filtered_beam.end(), filtered_beam.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
+                //dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(filtered_beam.begin(), filtered_beam.end(), filtered_beam.begin(), &model.gaussian_distribution_surface, 255.0f, 0.0f);
+
+                
+                // compute feature index
+                //feature_index = featureExtraction.getFeatureMaximalLevelDifference(filtered_beam, filtered_beam.size() / 30); // old
+                //feature_index= featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3, 5.0f, true); // inside
+                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3, 10.0f, false);
+            }
         } 
         catch (std::runtime_error e)
         {
             RTT::log(RTT::Warning) << "Error while filtering the sonarbeam: " << e.what() << RTT::endlog();
-            return;
         }
-        int index = featureExtraction.getFeatureMaximalLevelDifference(beam);
+        
         
         // write newest feature as laser scan without heading correction
-        _new_feature_as_laserscan.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(index, sonarBeam));
+        _new_feature_as_laserscan.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(feature_index, sonarBeam));
         
         // save feature as obstaclePoint if it has found one
-        if (index >= 0)
+        if (feature_index >= 0)
         {
-            sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(index, sonarBeam, current_orientation.orientation);
+            sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
             _new_feature.write(feature.position);
             featureMap.addFeature(feature, feature.angle.rad, feature.time);
         }
