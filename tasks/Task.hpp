@@ -19,6 +19,7 @@ namespace sonar_feature_estimator {
         sonar_detectors::SonarEnvironmentModel model;
         sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> featureMap;
         std::list<sonar_detectors::obstaclePoint>* featureList;
+        base::Time last_sample;
 
     public:
         Task(std::string const& name = "sonar_feature_estimator::Task", TaskCore::TaskState initial_state = Stopped);

@@ -51,7 +51,7 @@ bool Task::startHook()
     featureList = featureMap.getFeatureListPtr();
     featureMap.setFeatureTimeout(15000);
     current_orientation.invalidate();
-    
+    last_sample = base::Time::now();
     return true;
 }
 
@@ -63,6 +63,11 @@ void Task::updateHook()
     base::samples::SonarBeam sonarBeam;
     while (_sonar_input.read(sonarBeam) == RTT::NewData) 
     {
+        // avoid sample copies
+        if (sonarBeam.time == last_sample)
+            return;
+        last_sample = sonarBeam.time;
+        
         // update sonar environment model
         model.updateSonarBeamProperties(sonarBeam.sampling_interval);
         model.updateAUVOrientation(current_orientation.orientation);
