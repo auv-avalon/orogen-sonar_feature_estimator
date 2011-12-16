@@ -81,9 +81,9 @@ void Task::updateHook()
             // threshold filter
             float average_value = 0.0f;
             std::vector<float> temp_beam(sonarBeam.beam.size());
-            dsp::proportionallyThresholdFilter<std::vector<uint8_t>::const_iterator, std::vector<float>::iterator, float>(sonarBeam.beam.begin(), sonarBeam.beam.end(), temp_beam.begin(), average_value, 0.5, true);
+            dsp::proportionallyThresholdFilter<std::vector<uint8_t>::const_iterator, std::vector<float>::iterator, float>(sonarBeam.beam.begin(), sonarBeam.beam.end(), temp_beam.begin(), average_value, 0.5f, true);
             
-            if(average_value < 1.0)
+            if(average_value < 1.0f)
             {
                 std::cerr << "sonar beam is allmost empty." << std::endl;
             }
@@ -100,8 +100,7 @@ void Task::updateHook()
                 
                 // compute feature index
                 //feature_index = featureExtraction.getFeatureMaximalLevelDifference(filtered_beam, filtered_beam.size() / 30); // old
-                //feature_index= featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3, 5.0f, true); // inside
-                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3, 10.0f, false);
+                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3); // new
             }
         } 
         catch (std::runtime_error e)
