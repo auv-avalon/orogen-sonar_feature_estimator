@@ -7,6 +7,11 @@ using_library "dsp_acoustics"
 
 task_context "Task" do
 
+   property("proportional_value_threshold", 'double', 0.5).
+        doc("signal filter: every value under that proportional threshold of the mean value of the signal will be filtered out")
+   property("signal_threshold", 'double', 1.5).
+        doc("signal filter: if the mean value of the signal is below this threshold, the signal will be skiped")
+
    property("derivative_history_length", 'int', 3).
         doc("feature extraction: num of the derivatives to build the history")
    property("feature_threshold", 'double', 0.6).

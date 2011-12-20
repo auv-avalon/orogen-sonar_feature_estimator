@@ -80,9 +80,9 @@ void Task::updateHook()
             // threshold filter
             float average_value = 0.0f;
             std::vector<float> temp_beam(sonarBeam.beam.size());
-            dsp::proportionallyThresholdFilter<std::vector<uint8_t>::const_iterator, std::vector<float>::iterator, float>(sonarBeam.beam.begin(), sonarBeam.beam.end(), temp_beam.begin(), average_value, 0.5f, true);
+            dsp::proportionallyThresholdFilter<std::vector<uint8_t>::const_iterator, std::vector<float>::iterator, float>(sonarBeam.beam.begin(), sonarBeam.beam.end(), temp_beam.begin(), average_value, (float)_proportional_value_threshold, true);
             
-            if(average_value < 1.0f)
+            if(average_value < (float)_signal_threshold)
             {
                 RTT::log(RTT::Info) << "This sonar beam is allmost empty, skip this one." << RTT::endlog();
             }
