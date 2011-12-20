@@ -4,6 +4,7 @@
 #include <sonar_detectors/SonarBeamProcessing.hpp>
 #include <base/samples/pointcloud.h>
 #include <base/samples/laser_scan.h>
+#include <sonar_feature_estimator/FeatureEstimationDebugTypes.hpp>
 #include <dsp_acoustics/FIRFilter.h>
 
 using namespace sonar_feature_estimator;
@@ -111,6 +112,47 @@ void Task::updateHook()
         catch (std::runtime_error e)
         {
             RTT::log(RTT::Warning) << "Error while filtering the sonarbeam: " << e.what() << RTT::endlog();
+        }
+        
+        // create debug output
+        if(_enable_debug_output)
+        {
+            try
+            {
+                // display noise distributions
+                std::vector<float> device_noise(sonarBeam.beam.size());
+                std::vector<float> gauss(sonarBeam.beam.size());
+                
+                int pos_auv, pos_ground, pos_surface;
+                model.getExpectedObstaclePositions(sonarBeam.bearing.rad, pos_auv, pos_ground, pos_surface);
+                
+                dsp::addFunctionToSignal<std::vector<float>::const_iterator, std::vector<float>::iterator>(device_noise.begin(), device_noise.end(), device_noise.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
+                dsp::addFunctionToSignal<std::vector<float>::const_iterator, std::vector<float>::iterator>(gauss.begin(), gauss.end(), gauss.begin(), &model.gaussian_distribution_surface, 255.0f, 0.0f);
+                
+                
+                // display feature extraction debug data
+                std::vector<int> candidates;
+                std::vector<float> derivative, candidate_mean_value, candidate_plain_value;
+                float value_threshold, plain_window_threshold;
+                
+                featureExtraction.getFDHDebugData(derivative, value_threshold, plain_window_threshold, candidates, candidate_mean_value, candidate_plain_value);
+                
+                
+                sonar_detectors::FeatureEstimationDebug debug_data;
+                debug_data.filteredBeam = filtered_beam;
+                debug_data.derivative = derivative;
+                debug_data.device_noise_distribution = device_noise;
+                debug_data.gaussian_distribution = gauss;
+                debug_data.bestPos = feature_index;
+                debug_data.pos_auv = pos_auv;
+                debug_data.pos_ground = pos_ground;
+                debug_data.pos_surface = pos_surface;
+                _debug_output.write(debug_data);
+            }
+            catch (runtime_error e)
+            {
+                RTT::log(RTT::Warning) << "Error while creating the debug output: " << e.what() << RTT::endlog();
+            }
         }
         
         

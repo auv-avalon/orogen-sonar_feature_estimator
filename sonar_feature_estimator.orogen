@@ -2,6 +2,7 @@ name "sonar_feature_estimator"
 # version "0.1"
 
 import_types_from "base"
+import_types_from "FeatureEstimationDebugTypes.hpp"
 using_library "sonar_detectors"
 using_library "dsp_acoustics"
 
@@ -25,6 +26,9 @@ task_context "Task" do
    property("plain_threshold", 'double', 0.9).
         doc("feature extraction: the threshold to be a acceptable plain in percent of the mean signal strength")
 
+   property("enable_debug_output", 'bool', false).
+        doc("enable debug output on port debug_output")
+
    input_port("sonar_input", '/base/samples/SonarBeam').
     	needs_reliable_connection
    input_port("orientation_sample", '/base/samples/RigidBodyState')
@@ -37,6 +41,9 @@ task_context "Task" do
 
    output_port('filtered_sonarbeam', '/base/samples/SonarBeam').
         doc("filtered sonarbeam")
+
+   output_port('debug_output', '/sonar_detectors/FeatureEstimationDebug').
+        doc("sonarbeam debug port")
 
    port_driven "sonar_input"
 end
