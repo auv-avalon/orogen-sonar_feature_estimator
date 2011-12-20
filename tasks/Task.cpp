@@ -123,6 +123,11 @@ void Task::updateHook()
             sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
             featureMap.addFeature(feature, feature.angle.rad, feature.time);
         }
+        
+        // write filtered beam as sonarbeam
+        for(unsigned int i = 0; i < sonarBeam.beam.size(); i++)
+            sonarBeam.beam[i] = (uint8_t)filtered_beam[i];
+        _filtered_sonarbeam.write(sonarBeam);
     }
     
     base::samples::Pointcloud pointCloud;

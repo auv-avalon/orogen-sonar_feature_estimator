@@ -35,6 +35,8 @@ task_context "Task" do
    output_port('new_feature', '/base/samples/LaserScan').
         doc("newest sonar feature")
 
+   output_port('filtered_sonarbeam', '/base/samples/SonarBeam').
+        doc("filtered sonarbeam")
 
    port_driven "sonar_input"
 end
