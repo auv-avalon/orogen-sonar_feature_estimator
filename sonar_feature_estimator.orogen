@@ -7,7 +7,18 @@ using_library "dsp_acoustics"
 
 task_context "Task" do
 
-   property "config_value", "/std/string"
+   property("derivative_history_length", 'int', 3).
+        doc("feature extraction: num of the derivatives to build the history")
+   property("feature_threshold", 'double', 0.6).
+        doc("feature extraction: threshold for new features in percent of the mean of the last |best_values_size| best features")
+   property("best_values_size", 'int', 100).
+        doc("feature extraction: describes how many best-features will be saved to build the threshold")
+   property("signal_balancing", 'double', 0.2).
+        doc("feature extraction: signal_balancing is a slope that corrects the signal moderation")
+   property("plain_length", 'double', 0.1).
+        doc("feature extraction: the length of the plain in percent of signal length, if it is 0 the plain will be ignored")
+   property("plain_threshold", 'double', 0.9).
+        doc("feature extraction: the threshold to be a acceptable plain in percent of the mean signal strength")
 
    input_port("sonar_input", '/base/samples/SonarBeam').
     	needs_reliable_connection
@@ -16,11 +27,9 @@ task_context "Task" do
    output_port('features', '/base/samples/Pointcloud').
         doc("whole pointcloud of sonar features")
 
-   output_port('new_feature', '/base/Vector3d').
+   output_port('new_feature', '/base/samples/LaserScan').
         doc("newest sonar feature")
 
-   output_port('new_feature_as_laserscan', '/base/samples/LaserScan').
-        doc("newest sonar feature as LaserScan without heading correction")
 
    port_driven "sonar_input"
 end

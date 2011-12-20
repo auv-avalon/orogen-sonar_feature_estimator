@@ -43,8 +43,8 @@ bool Task::startHook()
     // check if input ports are connected
     if (!_sonar_input.connected())
     {
-        std::cerr << TaskContext::getName() << ": " 
-                    << "Input port 'sonar_input' is not connected." << std::endl;
+        RTT::log(RTT::Error) << TaskContext::getName() << ": " 
+                    << "Input port 'sonar_input' is not connected." << RTT::endlog();
         return false;
     }
     
@@ -72,7 +72,6 @@ void Task::updateHook()
         model.updateSonarBeamProperties(sonarBeam.sampling_interval);
         model.updateAUVOrientation(current_orientation.orientation);
         model.updateDistanceToSurface(current_orientation.position.z() * -1);
-        featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval);
         
         std::vector<float> filtered_beam(sonarBeam.beam.size());
         int feature_index = -1;
@@ -85,7 +84,7 @@ void Task::updateHook()
             
             if(average_value < 1.0f)
             {
-                std::cerr << "sonar beam is allmost empty." << std::endl;
+                RTT::log(RTT::Info) << "This sonar beam is allmost empty, skip this one." << RTT::endlog();
             }
             else
             {
@@ -99,8 +98,14 @@ void Task::updateHook()
 
                 
                 // compute feature index
-                //feature_index = featureExtraction.getFeatureMaximalLevelDifference(filtered_beam, filtered_beam.size() / 30); // old
-                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam, 3); // new
+                featureExtraction.featureDerivativeHistoryConfiguration((unsigned int)_derivative_history_length, (float)_feature_threshold, (unsigned int)_best_values_size, 
+                                                                        (float)_signal_balancing, (float)_plain_length, (float)_plain_threshold);
+                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam);
+                
+                // compute feature index, obsolete version
+                //featureExtraction.setMinResponseValue(20.0);
+                //featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval); 
+                //feature_index = featureExtraction.getFeatureMaximalLevelDifference(filtered_beam, filtered_beam.size() / 30); 
             }
         } 
         catch (std::runtime_error e)
@@ -110,13 +115,12 @@ void Task::updateHook()
         
         
         // write newest feature as laser scan without heading correction
-        _new_feature_as_laserscan.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(feature_index, sonarBeam));
+        _new_feature.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(feature_index, sonarBeam));
         
         // save feature as obstaclePoint if it has found one
         if (feature_index >= 0)
         {
             sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
-            _new_feature.write(feature.position);
             featureMap.addFeature(feature, feature.angle.rad, feature.time);
         }
     }
