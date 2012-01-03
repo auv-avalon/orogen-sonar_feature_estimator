@@ -157,12 +157,12 @@ void Task::updateHook()
         
         
         // write newest feature as laser scan without heading correction
-        _new_feature.write(sonar_detectors::SonarBeamProcessing::computeLaserScan(feature_index, sonarBeam));
+        _new_feature.write(sonar_detectors::FeatureExtraction::computeLaserScan(feature_index, sonarBeam));
         
         // save feature as obstaclePoint if it has found one
         if (feature_index >= 0)
         {
-            sonar_detectors::obstaclePoint feature = sonar_detectors::SonarBeamProcessing::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
+            sonar_detectors::obstaclePoint feature = sonar_detectors::FeatureExtraction::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
             featureMap.addFeature(feature, feature.angle.rad, feature.time);
         }
         
