@@ -1,7 +1,6 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
 
 #include "Task.hpp"
-#include <sonar_detectors/SonarBeamProcessing.hpp>
 #include <base/samples/pointcloud.h>
 #include <base/samples/laser_scan.h>
 #include <sonar_feature_estimator/FeatureEstimationDebugTypes.hpp>
