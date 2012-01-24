@@ -130,11 +130,11 @@ void Task::updateHook()
                 
                 
                 // display feature extraction debug data
-                std::vector<int> candidates;
-                std::vector<float> derivative, candidate_mean_value, candidate_plain_value;
+                std::vector<sonar_detectors::FeatureExtraction::FeatureCandidates> candidates;
+                std::vector<float> derivative;
                 float value_threshold, plain_window_threshold;
                 
-                featureExtraction.getFDHDebugData(derivative, value_threshold, plain_window_threshold, candidates, candidate_mean_value, candidate_plain_value);
+                featureExtraction.getFDHDebugData(derivative, value_threshold, plain_window_threshold, candidates);
                 
                 
                 sonar_detectors::FeatureEstimationDebug debug_data;
