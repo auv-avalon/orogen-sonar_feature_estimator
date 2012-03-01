@@ -24,9 +24,8 @@ Orocos.run 'sonar_feature_estimator' do
     auv_avalon.showDesiredModelPosition(false)
 
     # Connect debug port to vizkit plugins
-    con = Vizkit.connect_port_to 'sonar_feature_estimator', 'features', :type => :buffer, :size => 100, :auto_reconnect => true, :pull => false, :update_frequency => 33 do |sample, name|
+    con = Vizkit.connect_port_to 'sonar_feature_estimator', 'features', :pull => false, :update_frequency => 33 do |sample, _|
         sonarfeatureviz.updatePointCloud(sample)
-        sample
     end 
 
     log.orientation_estimator.orientation_samples :type => :buffer, :size => 100  do |sample|

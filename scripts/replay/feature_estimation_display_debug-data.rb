@@ -107,7 +107,7 @@ Orocos.run 'sonar_feature_estimator' do
     #log.pose_estimator.pose_samples.connect_to feature_estimator.orientation_sample
 
 
-    con = Vizkit.connect_port_to 'sonar_feature_estimator', 'debug_output', :type => :buffer, :size => 100, :auto_reconnect => true, :pull => false, :update_frequency => 33 do |sample, name|
+    con = Vizkit.connect_port_to 'sonar_feature_estimator', 'debug_output', :pull => false, :update_frequency => 33 do |sample, name|
         a = Array.new(sample.filteredBeam.length)
         b = Array.new(sample.filteredBeam.length)
         for i in 0..sample.filteredBeam.length-1 do
@@ -150,7 +150,6 @@ Orocos.run 'sonar_feature_estimator' do
             marker_ground.setValue(-1,0)
         end
         plot.replot
-        sample
     end 
 
     sonar_port.connect_to do |sample, null|

@@ -84,7 +84,7 @@ marker_surface.show
 feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
 feature_estimator.enable_debug_output = true
 
-con = Vizkit.connect_port_to 'sonar_feature_estimator', 'debug_output', :type => :buffer, :size => 100, :auto_reconnect => true, :pull => false, :update_frequency => 33 do |sample, name|
+con = Vizkit.connect_port_to 'sonar_feature_estimator', 'debug_output', :pull => false, :update_frequency => 33 do |sample, name|
     a = Array.new(sample.filteredBeam.length)
     b = Array.new(sample.filteredBeam.length)
     for i in 0..sample.filteredBeam.length-1 do
@@ -127,7 +127,6 @@ con = Vizkit.connect_port_to 'sonar_feature_estimator', 'debug_output', :type =>
         marker_ground.setValue(-1,0)
     end
     plot.replot
-    sample
 end 
 
 Vizkit.exec 
