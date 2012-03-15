@@ -96,7 +96,7 @@ sonarbeamviz = view3d.createPlugin("sonarbeam","SonarBeamVisualization")
 log = Orocos::Log::Replay.open(ARGV)
 sonar_port = log.find_port("/base/samples/SonarBeam")
 
-Orocos.run 'sonar_feature_estimator' do
+Orocos.run 'sonar_feature_estimator_test' do
 
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
     feature_estimator.enable_debug_output = true

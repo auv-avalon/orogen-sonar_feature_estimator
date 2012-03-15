@@ -50,7 +50,8 @@ end
 
 
 # Declares a deployment, i.e. an actual executable that contains various tasks.
-deployment "sonar_feature_estimator" do
+deployment "sonar_feature_estimator_test" do
+    do_not_install
     task("sonar_feature_estimator", "Task")
 end
 

@@ -10,7 +10,7 @@ end
 
 log = Orocos::Log::Replay.open(ARGV)
 
-Orocos.run 'sonar_feature_estimator' do
+Orocos.run 'sonar_feature_estimator_test' do
 
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
 
