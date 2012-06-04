@@ -74,6 +74,7 @@ void Task::updateHook()
         model.updateDistanceToSurface(current_orientation.position.z() * -1);
         
         std::vector<float> filtered_beam(sonarBeam.beam.size());
+        std::vector<sonar_detectors::FeatureCandidate> feature_candidates;
         int feature_index = -1;
         try 
         {
@@ -98,10 +99,13 @@ void Task::updateHook()
 
                 
                 // compute feature index
-                featureExtraction.featureDerivativeHistoryConfiguration((unsigned int)_derivative_history_length, (float)_feature_threshold, (unsigned int)_best_values_size, 
+                featureExtraction.setDerivativeFeatureConfiguration((unsigned int)_derivative_history_length, (float)_feature_threshold, (unsigned int)_best_values_size, 
                                                                         (float)_signal_balancing, (float)_plain_length, (float)_plain_threshold);
-                feature_index = featureExtraction.getFeatureDerivativeHistory(filtered_beam);
+                feature_candidates = featureExtraction.computeDerivativeFeatureCandidates(filtered_beam);
                 
+                // select feature with highest possibility
+                if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)
+                    feature_index = feature_candidates.front().beam_index;
                 // compute feature index, obsolete version
                 //featureExtraction.setMinResponseValue(20.0);
                 //featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval); 
@@ -130,11 +134,10 @@ void Task::updateHook()
                 
                 
                 // display feature extraction debug data
-                std::vector<sonar_detectors::FeatureExtraction::FeatureCandidates> candidates;
                 std::vector<float> derivative;
                 float value_threshold, plain_window_threshold;
+                featureExtraction.getDerivativeFeatureDebugData(derivative, value_threshold, plain_window_threshold);
                 
-                featureExtraction.getFDHDebugData(derivative, value_threshold, plain_window_threshold, candidates);
                 
                 
                 sonar_detectors::FeatureEstimationDebug debug_data;
