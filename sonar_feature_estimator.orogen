@@ -25,6 +25,8 @@ task_context "Task" do
         doc("feature extraction: the length of the plain in percent of signal length, if it is 0 the plain will be ignored")
    property("plain_threshold", 'double', 0.9).
         doc("feature extraction: the threshold to be a acceptable plain in percent of the mean signal strength")
+   property("enforce_line_rate", 'double', 0.0).
+        doc("feature extraction: how much impact the line reweighting should have")
 
    property("enable_debug_output", 'bool', false).
         doc("enable debug output on port debug_output")

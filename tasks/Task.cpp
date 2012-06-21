@@ -101,11 +101,27 @@ void Task::updateHook()
                 // compute feature index
                 featureExtraction.setDerivativeFeatureConfiguration((unsigned int)_derivative_history_length, (float)_feature_threshold, (unsigned int)_best_values_size, 
                                                                         (float)_signal_balancing, (float)_plain_length, (float)_plain_threshold);
+                
                 feature_candidates = featureExtraction.computeDerivativeFeatureCandidates(filtered_beam);
                 
                 // select feature with highest possibility
                 if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)
+                {
                     feature_index = feature_candidates.front().beam_index;
+                }
+                
+                // reweight candidates by line enforcement
+                if(_enforce_line_rate > 0.0)
+                {
+                    featureExtraction.setEnforceLinesConfiguration(5, 4, _enforce_line_rate);
+                    featureExtraction.enforceLines(feature_candidates, sonarBeam.bearing, sonarBeam.getSpatialResolution(), sonarBeam.beam.size());
+                    
+                    if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)
+                    {
+                        feature_index = feature_candidates.front().beam_index;
+                    }
+                }
+                
                 // compute feature index, obsolete version
                 //featureExtraction.setMinResponseValue(20.0);
                 //featureExtraction.setBoundingBox(1.5, sonarBeam.sampling_interval); 
