@@ -19,6 +19,10 @@ namespace sonar_feature_estimator {
         sonar_detectors::SonarEnvironmentModel model;
         sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> featureMap;
         std::list<sonar_detectors::obstaclePoint>* featureList;
+        
+        sonar_detectors::SonarMap<sonar_detectors::obstaclePoint> secondFeatureMap;
+        std::list<sonar_detectors::obstaclePoint>* secondFeatureList;
+        
         base::Time last_sample;
 
     public:

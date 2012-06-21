@@ -22,8 +22,6 @@ Task::~Task()
 {
 }
 
-
-
 /// The following lines are template definitions for the various state machine
 // hooks defined by Orocos::RTT. See Task.hpp for more detailed
 // documentation about them.
@@ -50,6 +48,8 @@ bool Task::startHook()
     
     featureList = featureMap.getFeatureListPtr();
     featureMap.setFeatureTimeout(15000);
+    secondFeatureList = secondFeatureMap.getFeatureListPtr();
+    secondFeatureMap.setFeatureTimeout(15000);
     current_orientation.invalidate();
     last_sample = base::Time::now();
     return true;
@@ -76,6 +76,8 @@ void Task::updateHook()
         std::vector<float> filtered_beam(sonarBeam.beam.size());
         std::vector<sonar_detectors::FeatureCandidate> feature_candidates;
         int feature_index = -1;
+        int feature_index_first = -1;
+        int feature_index_second = -1;
         try 
         {
             // threshold filter
@@ -108,6 +110,7 @@ void Task::updateHook()
                 if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)
                 {
                     feature_index = feature_candidates.front().beam_index;
+                    feature_index_first = feature_candidates.front().beam_index;
                 }
                 
                 // reweight candidates by line enforcement
@@ -119,6 +122,7 @@ void Task::updateHook()
                     if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)
                     {
                         feature_index = feature_candidates.front().beam_index;
+                        feature_index_second = feature_candidates.front().beam_index;
                     }
                 }
                 
@@ -148,15 +152,12 @@ void Task::updateHook()
                 dsp::addFunctionToSignal<std::vector<float>::const_iterator, std::vector<float>::iterator>(device_noise.begin(), device_noise.end(), device_noise.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
                 dsp::addFunctionToSignal<std::vector<float>::const_iterator, std::vector<float>::iterator>(gauss.begin(), gauss.end(), gauss.begin(), &model.gaussian_distribution_surface, 255.0f, 0.0f);
                 
-                
-                // display feature extraction debug data
+                // create 1d debug data debug data
                 std::vector<float> derivative;
                 float value_threshold, plain_window_threshold;
                 featureExtraction.getDerivativeFeatureDebugData(derivative, value_threshold, plain_window_threshold);
                 
-                
-                
-                sonar_detectors::FeatureEstimationDebug debug_data;
+                sonar_detectors::FeatureEstimation1DDebug debug_data;
                 debug_data.filteredBeam = filtered_beam;
                 debug_data.derivative = derivative;
                 debug_data.device_noise_distribution = device_noise;
@@ -166,6 +167,55 @@ void Task::updateHook()
                 debug_data.pos_ground = pos_ground;
                 debug_data.pos_surface = pos_surface;
                 _debug_output.write(debug_data);
+                
+                
+                // create 2d debug data
+                sonar_detectors::FeatureEstimation2DDebug debug_data_2d;
+                
+                std::list<sonar_detectors::HoughEntry> hough_entries;
+                featureExtraction.getEnforceLinesDebugData(hough_entries, debug_data_2d.force_line_pos);
+                
+                // save feature as obstaclePoint if it has found one
+                if (feature_index_first >= 0)
+                {
+                    sonar_detectors::obstaclePoint feature = sonar_detectors::FeatureExtraction::computeObstaclePoint(feature_index_first, sonarBeam, current_orientation.orientation);
+                    if(feature_index_first == feature_index_second)
+                        feature.position.z() = 1.0;
+                    else
+                        feature.position.z() = 2.0;
+                    featureMap.addFeature(feature, feature.angle.rad, feature.time);
+                }
+                debug_data_2d.point_cloud.time = base::Time::now();
+                for(std::list<sonar_detectors::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
+                {
+                    debug_data_2d.point_cloud.points.push_back(base::Vector3d(it->position.x(), it->position.y(), it->position.z()));
+                }
+                
+                // save diff features 
+                if(feature_index_second >= 0)
+                {
+                    sonar_detectors::obstaclePoint feature = sonar_detectors::FeatureExtraction::computeObstaclePoint(feature_index_second, sonarBeam, current_orientation.orientation);
+                    if(feature_index_first == feature_index_second)
+                        feature.position.z() = -1.0;
+                    else
+                        feature.position.z() = -2.0;
+                    secondFeatureMap.addFeature(feature, feature.angle.rad, feature.time);
+                }
+                debug_data_2d.point_cloud_force_line.time = base::Time::now();
+                for(std::list<sonar_detectors::obstaclePoint>::const_iterator it = secondFeatureList->begin(); it != secondFeatureList->end(); it++)
+                {
+                    debug_data_2d.point_cloud_force_line.points.push_back(base::Vector3d(it->position.x(), it->position.y(), it->position.z()));
+                }
+                
+                // save feature candidates
+                debug_data_2d.feature_candidates.time = base::Time::now();
+                for(std::vector<sonar_detectors::FeatureCandidate>::const_iterator it = feature_candidates.begin(); it != feature_candidates.end(); it++)
+                {
+                    sonar_detectors::obstaclePoint feature = sonar_detectors::FeatureExtraction::computeObstaclePoint(it->beam_index, sonarBeam, current_orientation.orientation);
+                    debug_data_2d.feature_candidates.points.push_back(base::Vector3d(feature.position.x(), feature.position.y(), it->probability));
+                }
+                
+                _2d_debug_output.write(debug_data_2d);
             }
             catch (runtime_error e)
             {
@@ -173,25 +223,9 @@ void Task::updateHook()
             }
         }
         
-        
         // write newest feature as laser scan without heading correction
         _new_feature.write(sonar_detectors::FeatureExtraction::computeLaserScan(feature_index, sonarBeam));
-        
-        // save feature as obstaclePoint if it has found one
-        if (feature_index >= 0)
-        {
-            sonar_detectors::obstaclePoint feature = sonar_detectors::FeatureExtraction::computeObstaclePoint(feature_index, sonarBeam, current_orientation.orientation);
-            featureMap.addFeature(feature, feature.angle.rad, feature.time);
-        }
     }
-    
-    base::samples::Pointcloud pointCloud;
-    pointCloud.time = base::Time::now();
-    for(std::list<sonar_detectors::obstaclePoint>::const_iterator it = featureList->begin(); it != featureList->end(); it++)
-    {
-        pointCloud.points.push_back(it->position);
-    }
-    _features.write(pointCloud);
 }
 
 // void Task::errorHook()

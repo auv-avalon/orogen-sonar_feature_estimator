@@ -35,14 +35,14 @@ task_context "Task" do
     	needs_reliable_connection
    input_port("orientation_sample", '/base/samples/RigidBodyState')
 
-   output_port('features', '/base/samples/Pointcloud').
-        doc("whole pointcloud of sonar features")
-
    output_port('new_feature', '/base/samples/LaserScan').
         doc("newest sonar feature")
 
-   output_port('debug_output', '/sonar_detectors/FeatureEstimationDebug').
+   output_port('debug_output', '/sonar_detectors/FeatureEstimation1DDebug').
         doc("sonarbeam debug port")
+        
+   output_port('2d_debug_output', '/sonar_detectors/FeatureEstimation2DDebug').
+        doc("sonarbeam debug port, two dimensional data")
 
    port_driven "sonar_input"
 end

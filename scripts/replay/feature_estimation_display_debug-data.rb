@@ -101,7 +101,7 @@ Orocos.run 'sonar_feature_estimator_test' do
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
     feature_estimator.enable_debug_output = true
     
-    sonar_port.connect_to feature_estimator.sonar_input
+    sonar_port.connect_to feature_estimator.sonar_input, :type => :buffer, :size => 100
     #log.sonar.SonarScan.connect_to feature_estimator.sonar_input
     log.orientation_estimator.orientation_samples.connect_to feature_estimator.orientation_sample
     #log.pose_estimator.pose_samples.connect_to feature_estimator.orientation_sample
