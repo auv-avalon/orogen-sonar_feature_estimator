@@ -22,15 +22,15 @@ Orocos.run 'sonar_feature_estimator_test' do
     log.sonar.BaseScan.connect_to feature_estimator.sonar_input, :type => :buffer, :size => 100
     log.orientation_estimator.orientation_samples.connect_to feature_estimator.orientation_sample
 
-    view3d = Vizkit.default_loader.create_widget('vizkit::Vizkit3DWidget')
+    view3d = Vizkit.vizkit3d_widget
     view3d.show()
-    sonarfeatureviz = view3d.createPlugin('sonarfeature', 'SonarFeatureVisualization')
-    sonarfeaturediffviz = view3d.createPlugin('sonarfeature', 'SonarFeatureVisualization')
+    sonarfeatureviz = Vizkit.default_loader.SonarFeatureVisualization
+    sonarfeaturediffviz = Vizkit.default_loader.SonarFeatureVisualization
     color = Qt::Color.new
     color.red = 255.0
     sonarfeaturediffviz.setDefaultFeatureColor(color)
-    auv_avalon = view3d.createPlugin('auv_avalon', 'AUVAvalonVisualization')
-    #wallviz = view3d.createPlugin('wall', 'WallVisualization')
+    auv_avalon = Vizkit.default_loader.AUVAvalonVisualization
+    #wallviz = Vizkit.default_loader.WallVisualization
     auv_avalon.showDesiredModelPosition(false)
 
     # Connect debug port to vizkit plugins
