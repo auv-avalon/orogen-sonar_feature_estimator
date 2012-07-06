@@ -114,9 +114,9 @@ void Task::updateHook()
                 }
                 
                 // reweight candidates by line enforcement
-                if(_enforce_line_rate > 0.0)
+                if(_enforce_line_rate > 0.0 || _minimum_enforce_line_value > 0.0)
                 {
-                    featureExtraction.setEnforceLinesConfiguration(5, 4, _enforce_line_rate);
+                    featureExtraction.setEnforceLinesConfiguration(5, 4, _enforce_line_rate, _minimum_enforce_line_value);
                     featureExtraction.enforceLines(feature_candidates, sonarBeam.bearing, sonarBeam.getSpatialResolution(), sonarBeam.beam.size());
                     
                     if(feature_candidates.size() > 0 && feature_candidates.front().probability > 0.0)

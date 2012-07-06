@@ -16,6 +16,7 @@ Orocos.run 'sonar_feature_estimator_test' do
     feature_estimator = Orocos::TaskContext.get 'sonar_feature_estimator'
     feature_estimator.derivative_history_length = 3
     feature_estimator.enforce_line_rate = 0.5
+    feature_estimator.minimum_enforce_line_value = 0.0
     feature_estimator.feature_threshold = 0.6
     feature_estimator.enable_debug_output = true
 
