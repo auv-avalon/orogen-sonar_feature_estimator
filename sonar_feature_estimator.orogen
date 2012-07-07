@@ -29,6 +29,8 @@ task_context "Task" do
         doc("feature extraction: how much impact the line reweighting should have")
    property("minimum_enforce_line_value", 'double', 0.0).
         doc("feature extraction: minimum impact possible walls should have to each feature")
+   property("enforce_line_beam_covariance", 'double', 0.2).
+        doc("feature extraction: covariance in meter on each beam in the distance of one meter")
 
    property("enable_debug_output", 'bool', false).
         doc("enable debug output on port debug_output")
