@@ -25,12 +25,14 @@ task_context "Task" do
         doc("feature extraction: the length of the plain in percent of signal length, if it is 0 the plain will be ignored")
    property("plain_threshold", 'double', 0.9).
         doc("feature extraction: the threshold to be a acceptable plain in percent of the mean signal strength")
-   property("enforce_line_rate", 'double', 0.0).
+   property("enforce_line_rate", 'double', 0.5).
         doc("feature extraction: how much impact the line reweighting should have")
-   property("minimum_enforce_line_value", 'double', 0.0).
+   property("minimum_enforce_line_value", 'double', 1.0).
         doc("feature extraction: minimum impact possible walls should have to each feature")
    property("enforce_line_beam_covariance", 'double', 0.2).
         doc("feature extraction: covariance in meter on each beam in the distance of one meter")
+   property("avalon_boundary_box_size", 'double', 1.2).
+        doc("radius of the boundary box of avalon")
 
    property("enable_debug_output", 'bool', false).
         doc("enable debug output on port debug_output")

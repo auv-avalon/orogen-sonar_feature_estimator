@@ -96,6 +96,7 @@ void Task::updateHook()
 
                 // subtract noise distributions
                 model.updateNoiseDistributionValues(sonarBeam.bearing.rad, filtered_beam);
+                model.setSimpleAUVModelBoundary(_avalon_boundary_box_size);
                 dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(filtered_beam.begin(), filtered_beam.end(), filtered_beam.begin(), &model.device_noise_distribution, 255.0f, 0.0f);
                 //dsp::subtractFunctionFromSignal<std::vector<float>::const_iterator,std::vector<float>::iterator, float>(filtered_beam.begin(), filtered_beam.end(), filtered_beam.begin(), &model.gaussian_distribution_surface, 255.0f, 0.0f);
 
