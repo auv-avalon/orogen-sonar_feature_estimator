@@ -14,7 +14,8 @@ task_context "Task" do
         doc("signal filter: if the mean value of the signal is below this threshold, the signal will be skiped")
 
    property("derivative_history_length", 'int', 3).
-        doc("feature extraction: num of the derivatives to build the history")
+        doc("feature extraction: num of the derivatives to build the history.").
+        doc("should be 1 in small artificial environments and 3 in large natural environments.")
    property("feature_threshold", 'double', 0.6).
         doc("feature extraction: threshold for new features in percent of the mean of the last |best_values_size| best features")
    property("best_values_size", 'int', 100).
