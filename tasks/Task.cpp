@@ -218,7 +218,7 @@ void Task::updateHook()
                 
                 _2d_debug_output.write(debug_data_2d);
             }
-            catch (runtime_error e)
+            catch (std::runtime_error e)
             {
                 RTT::log(RTT::Warning) << "Error while creating the debug output: " << e.what() << RTT::endlog();
             }
