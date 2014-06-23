@@ -44,6 +44,9 @@ task_context "Task" do
 
    output_port('new_feature', '/base/samples/LaserScan').
         doc("newest sonar feature")
+        
+   output_port('features_out', '/sonar_detectors/ObstacleFeatures').
+        doc('All extracted features')
 
    output_port('debug_output', '/sonar_detectors/FeatureEstimation1DDebug').
         doc("sonarbeam debug port")
