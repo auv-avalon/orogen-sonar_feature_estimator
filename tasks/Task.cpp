@@ -226,13 +226,15 @@ void Task::updateHook()
         
         
         sonar_detectors::ObstacleFeatures features;
+        features.time = sonarBeam.time;
+        features.angle = sonarBeam.bearing.rad;
+        
         for(std::vector<sonar_detectors::FeatureCandidate>::const_iterator it = feature_candidates.begin(); it != feature_candidates.end(); it++)
         {        
           sonar_detectors::ObstacleFeature of;
           of.confidence = it->probability;
           of.range = (uint32_t) ((it->beam_index * sonarBeam.getSpatialResolution()) * 1000);
           
-          features.angle = sonarBeam.bearing.rad;
           features.features.push_back(of);
           
         }
