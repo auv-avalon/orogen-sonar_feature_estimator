@@ -36,20 +36,6 @@ struct FeatureEstimation2DDebug
 };
 
 
-struct ObstacleFeature
-{
-  uint32_t range;
-  double confidence;  
-};
-
-struct ObstacleFeatures
-{
-  base::Time time;
-  double angle;
-  std::vector<ObstacleFeature> features;
- 
-};
-
 }
 
 #endif
