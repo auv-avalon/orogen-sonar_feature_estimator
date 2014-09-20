@@ -50,7 +50,7 @@ bool Task::startHook()
     featureMap.setFeatureTimeout(15000);
     secondFeatureList = secondFeatureMap.getFeatureListPtr();
     secondFeatureMap.setFeatureTimeout(15000);
-    current_orientation.invalidate();
+    current_orientation.initUnknown();
     last_sample = base::Time::now();
     return true;
 }
